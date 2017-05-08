@@ -75,8 +75,7 @@
   }
   
   function addPoint(event) {
-    var p = correctPosition({ x: event.clientX, y: event.clientY });
-    console.log(lastSeq);
+    var p = correctPosition({ x: event.layerX, y: event.layerY });
     if(isInCircle(p))
       points.push(Object.assign({}, prms.point, p, { seq: lastSeq }));
   }
