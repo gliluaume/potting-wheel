@@ -42,21 +42,27 @@
     ctx.strokeStyle = prms.dimensions.circleColor;
     ctx.arc(0, 0, prms.dimensions.squareSize * prms.dimensions.circleFactor, 0, Math.PI * 2, true);
     ctx.stroke();
-    
+
     // add pointing mouse down
     if(pointing) addPoint(pointing);
-    
+
     // draw points
     points.forEach((point) => drawCircle(ctx, point));
 
     ctx.restore();
     window.requestAnimationFrame(draw)
   }
-  
+
   function clear() {
     points = [];
   }
-  
+
+  function save() {
+    var canvas = document.getElementById('canvas');
+    var dataURL = canvas.toDataURL();
+    document.getElementById('canvasImg').src = dataURL;
+  }
+
   function deleteLastSeq() {
     points = points.filter(p => p.seq < lastSeq);
     lastSeq = getLastSeq();
@@ -73,7 +79,7 @@
     ctx.arc(point.x + prms.point.xOffset, point.y + prms.point.yOffset, point.radius, 0, Math.PI * 2, true);
     ctx.stroke();
   }
-  
+
   function addPoint(event) {
     var p = correctPosition({ x: event.layerX, y: event.layerY });
     if(isInCircle(p))
@@ -82,10 +88,10 @@
   function isInCircle(p) {
     return (Math.pow(p.x, 2) + Math.pow(p.y, 2) <  Math.pow(prms.dimensions.squareSize * prms.dimensions.circleFactor, 2));
   }
-  
+
   function correctPosition(p) {
     var alpha = -currentAngle;
-    return  rotatePoint({ 
+    return  rotatePoint({
       x: p.x * 1/prms.dimensions.scaleFactor - prms.dimensions.squareSize/2 * 1/prms.dimensions.scaleFactor,
       y: p.y * 1/prms.dimensions.scaleFactor - prms.dimensions.squareSize/2 * 1/prms.dimensions.scaleFactor,
     });
@@ -93,7 +99,7 @@
 
   function rotatePoint(p, alpha) {
     var alpha = alpha || -currentAngle;
-    return { 
+    return {
       x: p.x * Math.cos(alpha) - p.y * Math.sin(alpha),
       y: p.x * Math.sin(alpha) + p.y * Math.cos(alpha)
     }
@@ -106,43 +112,45 @@
   canvasElt.addEventListener('mousedown', (event) => { lastSeq++; pointing = event; }, false);
   canvasElt.addEventListener('mousemove', (event) => { if(pointing) pointing = event }, false);
   canvasElt.addEventListener('mouseup', (event) => pointing = null, false);
-  
-  // on fait une interface avec l'extérieur  
+
+  // on fait une interface avec l'extérieur
   window.requestAnimationFrame(draw);
   window.pottingWheelPrms = prms;
   window.pottingWheelPrms.clear = clear;
   window.pottingWheelPrms.undo = deleteLastSeq;
+  window.pottingWheelPrms.save = save;
 })(window);
 
 (function(window){
   if(window.pottingWheelPrms) {
-   
+
     document.getElementById('angular-speed').value = Math.round(window.pottingWheelPrms.angularSpeed * 100);
     document.getElementById('color').value = window.pottingWheelPrms.point.color;
     document.getElementById('lineWidth').value = window.pottingWheelPrms.point.lineWidth;
     document.getElementById('radius').value = window.pottingWheelPrms.point.radius;
-    
+
     document.getElementById('angular-speed')
-    .addEventListener('change', (event) => { 
+    .addEventListener('change', (event) => {
        window.pottingWheelPrms.angularSpeed = event.target.value / 100;
     });
     mapPointOption('color', 'color');
     mapPointOption('radius', 'radius');
     mapPointOption('lineWidth', 'lineWidth');
-    
+
     mapAction('clear', 'clear');
     mapAction('undo', 'undo');
-       
+    mapAction('save', 'save');
+
     function mapAction(idHtml, actionName) {
       document.getElementById(idHtml)
-      .addEventListener('click', (event) => { 
+      .addEventListener('click', (event) => {
          window.pottingWheelPrms[actionName]();
       });
     }
-    
+
     function mapPointOption(idHtml, optionName) {
       document.getElementById(idHtml)
-      .addEventListener('change', (event) => { 
+      .addEventListener('change', (event) => {
          window.pottingWheelPrms.point[optionName] = event.target.value;
       });
     }
