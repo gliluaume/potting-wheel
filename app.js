@@ -59,8 +59,9 @@
 
   function save() {
     var canvas = document.getElementById('canvas');
-    var dataURL = canvas.toDataURL();
-    document.getElementById('canvasImg').src = dataURL;
+    var imageDl = document.getElementById('canvasImgDl');
+    imageDl.href = canvas.toDataURL();
+    document.getElementById('canvasImgDl').click()
   }
 
   function deleteLastSeq() {
